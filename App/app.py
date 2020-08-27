@@ -76,6 +76,7 @@ def printMenu():
     print("2- Contar los elementos de la Lista")
     print("3- Contar elementos filtrados por palabra clave")
     print("4- Consultar elementos a partir de dos listas")
+    print("5- Ordenar por ranking")
     print("0- Salir")
 
 def countElementsFilteredByColumn(criteria, column, lst):
@@ -117,7 +118,56 @@ def orderElementsByCriteria(function, column, lst, elements):
     """
     Retorna una lista con cierta cantidad de elementos ordenados por el criterio
     """
-    return 0
+    if lst['size']==0:
+        print("La lista esta vacía")
+        return 0
+    
+    else:
+        elementos=lt.newList()
+        iterator=it.newIterator(lst)
+        columna=None
+        if column=="1":
+            columna="vote_average"
+        else:
+            columna="vote_count"
+        while it.hasNext(iterator):
+            elemento=it.next(iterator)
+            lt.addLast(elementos,[float(elemento[columna]),int(elemento["id"]),elemento["original_title"]])                          
+        if function=="1":
+            t1_start = process_time()
+            ss.selectionSort(elementos,lessfunction)
+            t1_stop = process_time()
+            print("Tiempo de ejecución del ordenamiento SELECTION_SORT es ",t1_stop-t1_start," segundos")
+        elif function=="2":
+            t1_start = process_time()
+            Is.insertionSort(elementos,lessfunction)
+            t1_stop = process_time()
+            print("Tiempo de ejecución del ordenamiento INSERTION_SORT es ",t1_stop-t1_start," segundos")
+        else:
+            t1_start = process_time()
+            shs.shellSort(elementos,lessfunction)
+            t1_stop = process_time()
+            print("Tiempo de ejecución del ordenamiento SHELL_SORT es ",t1_stop-t1_start," segundos")
+        if elements=="1":
+            top=lt.subList(elementos,elementos["size"]-9,10)
+            iterator_top=it.newIterator(top)
+            respuesta=[]
+            i=10
+            while it.hasNext(iterator_top):
+                elemento_top=it.next(iterator_top)
+                respuesta.append(str(i)+". "+elemento_top[2]+" con "+columna+" de "+str(elemento_top[0]))
+                i-=1
+            return respuesta
+        else:
+            top=lt.subList(elementos,1,10)
+            iterator_top=it.newIterator(top)
+            respuesta=[]
+            i=1
+            while it.hasNext(iterator_top):
+                elemento_top=it.next(iterator_top)
+                respuesta.append(str(i)+". "+elemento_top[2]+" con "+columna+" de "+str(elemento_top[0]))
+                i+=1
+            return respuesta[::-1]
 
 def main():
     """
@@ -153,8 +203,42 @@ def main():
                     criteria =input('Ingrese el criterio de búsqueda\n')
                     counter=countElementsByCriteria(criteria,0,lista)
                     print("Coinciden ",counter," elementos con el crtierio: '", criteria ,"' (en construcción ...)")
+            elif int(inputs[0])==5: #opcion 5
+                if lista==None or lista["size"]==0: #obtener la longitud de la lista
+                    print("La lista está vacía")
+                else:
+                    print("1. VOTE_AVERAGE\n2. VOTE_COUNT")
+                    column=input("Ingrese un número: ")
+                    while True:
+                        if column.isnumeric():
+                            if int(column) in range(1,3):
+                                break
+                        else:
+                            function=input("Ingrese una opción válida: ")   
+                    print("\n1. SELECTION_SORT\n2. INSERTION_SORT\n3. SHELL_SORT")
+                    function=input("Ingrese un número: ")
+                    while True:
+                        if function.isnumeric():
+                            if int(function) in range(1,4):
+                                break
+                        else:
+                            function=input("Ingrese una opción válida: ")             
+                    print("\n1. 10_MEJORES\n2. 10_PEORES")
+                    elements=input("Ingrese un número: ")
+                    while True:
+                        if elements.isnumeric():
+                            if int(function) in range(1,4):
+                                break
+                        else:
+                            elements=input("Ingrese una opción válida: ")        
+                    respuesta=orderElementsByCriteria(function, column, lista, elements)
+                    print(respuesta) 
             elif int(inputs[0])==0: #opcion 0, salir
                 sys.exit(0)
-                
+
+def lessfunction(element1, element2):
+    if element1<element2:
+        return True
+    return False                
 if __name__ == "__main__":
     main()
